@@ -2156,7 +2156,7 @@ export interface paths {
         };
         /**
          * Return from installing the GitHub App
-         * @description GitHub sends the browser here with the installation id and an OAuth code. The installation is linked only if the signed-in Liftbay user started the install and the GitHub user who installed it can access that installation.
+         * @description GitHub sends the browser here with the installation id and an OAuth code. The installation is linked only if the signed-in Liftbay user started the install and the GitHub user who installed it controls the account it was installed on (the account itself, or admin on its repositories).
          */
         get: {
             parameters: {
@@ -2165,6 +2165,8 @@ export interface paths {
                     setup_action?: string;
                     state?: string;
                     code?: string;
+                    /** @description Set by the dashboard after it signed the browser in */
+                    finish?: string;
                 };
                 header?: never;
                 path?: never;
@@ -7681,6 +7683,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             url: string;
+                            /** @description Follow it with GET /github/install/{attempt} */
+                            attempt: string;
                         };
                     };
                 };
@@ -7731,6 +7735,89 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org}/github/install/{attempt}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Follow an install
+         * @description What happened after the install link was opened: GitHub only tells the browser. Unknown after two hours or a server restart (404).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Organization slug */
+                    org: string;
+                    attempt: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            status: "waiting" | "needs_sign_in" | "wrong_account" | "connected" | "cancelled" | "forbidden" | "taken" | "failed" | "expired";
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Not signed in, or the API token is invalid */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Your role does not have the required permission */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Unknown attempt */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Validation failed; `fields` names the invalid inputs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;

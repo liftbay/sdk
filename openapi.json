@@ -6026,7 +6026,7 @@
           "GitHub"
         ],
         "summary": "Return from installing the GitHub App",
-        "description": "GitHub sends the browser here with the installation id and an OAuth code. The installation is linked only if the signed-in Liftbay user started the install and the GitHub user who installed it can access that installation.",
+        "description": "GitHub sends the browser here with the installation id and an OAuth code. The installation is linked only if the signed-in Liftbay user started the install and the GitHub user who installed it controls the account it was installed on (the account itself, or admin on its repositories).",
         "security": [],
         "x-liftbay-permission": "public",
         "parameters": [
@@ -6060,6 +6060,16 @@
             },
             "required": false,
             "name": "code",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Set by the dashboard after it signed the browser in"
+            },
+            "required": false,
+            "description": "Set by the dashboard after it signed the browser in",
+            "name": "finish",
             "in": "query"
           }
         ],
@@ -13370,10 +13380,15 @@
                   "properties": {
                     "url": {
                       "type": "string"
+                    },
+                    "attempt": {
+                      "type": "string",
+                      "description": "Follow it with GET /github/install/{attempt}"
                     }
                   },
                   "required": [
-                    "url"
+                    "url",
+                    "attempt"
                   ]
                 }
               }
@@ -13411,6 +13426,121 @@
           },
           "409": {
             "description": "No GitHub App configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed; `fields` names the invalid inputs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org}/github/install/{attempt}": {
+      "get": {
+        "tags": [
+          "GitHub"
+        ],
+        "summary": "Follow an install",
+        "description": "What happened after the install link was opened: GitHub only tells the browser. Unknown after two hours or a server restart (404).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiToken": []
+          }
+        ],
+        "x-liftbay-permission": "org.read",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Organization slug",
+              "example": "acme"
+            },
+            "required": true,
+            "description": "Organization slug",
+            "name": "org",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "required": true,
+            "name": "attempt",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "waiting",
+                        "needs_sign_in",
+                        "wrong_account",
+                        "connected",
+                        "cancelled",
+                        "forbidden",
+                        "taken",
+                        "failed",
+                        "expired"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the API token is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Your role does not have the required permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown attempt",
             "content": {
               "application/json": {
                 "schema": {
