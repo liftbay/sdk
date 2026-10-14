@@ -232,6 +232,22 @@
           "viewer"
         ]
       },
+      "DeviceAuthToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "CLI session token (`lbs_…`), sent as a Bearer token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "token",
+          "user"
+        ]
+      },
       "DeviceAuthStart": {
         "type": "object",
         "properties": {
@@ -263,22 +279,6 @@
           "verificationUriComplete",
           "expiresIn",
           "interval"
-        ]
-      },
-      "DeviceAuthToken": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string",
-            "description": "CLI session token (`lbs_…`), sent as a Bearer token"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "required": [
-          "token",
-          "user"
         ]
       },
       "DeviceAuthRequest": {
@@ -3867,6 +3867,74 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed; `fields` names the invalid inputs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/email/token": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign in with an email code (CLI)",
+        "description": "Like /email/verify, but for the CLI: returns a CLI session token instead of setting a cookie. Signing in for the first time creates the account. Start with /email/start.",
+        "security": [],
+        "x-liftbay-permission": "public",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "email",
+                  "code"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceAuthToken"
                 }
               }
             }

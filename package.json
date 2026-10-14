@@ -1,6 +1,6 @@
 {
   "name": "@liftbay/sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Typed client for the Liftbay API, generated from its OpenAPI document.",
   "keywords": [
     "liftbay",

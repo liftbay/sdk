@@ -174,6 +174,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/email/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in with an email code (CLI)
+         * @description Like /email/verify, but for the CLI: returns a CLI session token instead of setting a cookie. Signing in for the first time creates the account. Start with /email/start.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: email */
+                        email: string;
+                        code: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DeviceAuthToken"];
+                    };
+                };
+                /** @description Validation failed; `fields` names the invalid inputs */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+                /** @description Too many attempts */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiError"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/oauth/{method}": {
         parameters: {
             query?: never;
@@ -9883,6 +9948,11 @@ export interface components {
         };
         /** @enum {string} */
         Role: "owner" | "admin" | "developer" | "viewer";
+        DeviceAuthToken: {
+            /** @description CLI session token (`lbs_…`), sent as a Bearer token */
+            token: string;
+            user: components["schemas"]["User"];
+        };
         DeviceAuthStart: {
             /** @description Secret the CLI polls with. Never shown to the user. */
             deviceCode: string;
@@ -9892,11 +9962,6 @@ export interface components {
             verificationUriComplete: string;
             expiresIn: number;
             interval: number;
-        };
-        DeviceAuthToken: {
-            /** @description CLI session token (`lbs_…`), sent as a Bearer token */
-            token: string;
-            user: components["schemas"]["User"];
         };
         DeviceAuthRequest: {
             userCode: string;
