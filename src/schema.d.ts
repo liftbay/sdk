@@ -5760,7 +5760,7 @@ export interface paths {
         put?: never;
         /**
          * Propose the Liftbay workflow as a pull request
-         * @description Pushes .github/workflows/liftbay.yml to the liftbay/workflow branch and opens a pull request against the default branch. Liftbay never pushes to other branches.
+         * @description Pushes .github/workflows/liftbay.yml to the liftbay/workflow branch and opens a pull request against the default branch. Besides this, Liftbay only creates temporary liftbay/build/* branches to start builds.
          */
         post: {
             parameters: {
@@ -10660,6 +10660,11 @@ export interface components {
             repo: string | null;
             bundleId: string | null;
             androidPackage: string | null;
+            /**
+             * @description Where iOS store builds run unless a build picks: null prefers a connected Xcode Cloud
+             * @enum {string|null}
+             */
+            iosEngine: "github-actions" | "xcode-cloud" | null;
             createdAt: string;
         };
         AuditEntry: {
@@ -10686,7 +10691,10 @@ export interface components {
             bundleId?: string | null;
             androidPackage?: string | null;
             repo?: string | null;
+            iosEngine?: components["schemas"]["IosEngine"];
         };
+        /** @enum {string|null} */
+        IosEngine: "github-actions" | "xcode-cloud" | null;
     };
     responses: never;
     parameters: never;

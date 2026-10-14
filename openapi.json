@@ -3567,6 +3567,18 @@
               "null"
             ]
           },
+          "iosEngine": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "github-actions",
+              "xcode-cloud",
+              null
+            ],
+            "description": "Where iOS store builds run unless a build picks: null prefers a connected Xcode Cloud"
+          },
           "createdAt": {
             "type": "string"
           }
@@ -3580,6 +3592,7 @@
           "repo",
           "bundleId",
           "androidPackage",
+          "iosEngine",
           "createdAt"
         ]
       },
@@ -3691,8 +3704,22 @@
               "null"
             ],
             "maxLength": 300
+          },
+          "iosEngine": {
+            "$ref": "#/components/schemas/IosEngine"
           }
         }
+      },
+      "IosEngine": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "github-actions",
+          "xcode-cloud",
+          null
+        ]
       }
     },
     "parameters": {}
@@ -11049,7 +11076,7 @@
           "GitHub"
         ],
         "summary": "Propose the Liftbay workflow as a pull request",
-        "description": "Pushes .github/workflows/liftbay.yml to the liftbay/workflow branch and opens a pull request against the default branch. Liftbay never pushes to other branches.",
+        "description": "Pushes .github/workflows/liftbay.yml to the liftbay/workflow branch and opens a pull request against the default branch. Besides this, Liftbay only creates temporary liftbay/build/* branches to start builds.",
         "security": [
           {
             "session": []
